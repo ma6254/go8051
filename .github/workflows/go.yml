@@ -1,65 +1,25 @@
 name: Go
+
 on:
   push:
-    paths-ignore:
-      - "docs/**"
+    branches: [ main ]
   pull_request:
-    paths-ignore:
-      - "docs/**"
+    branches: [ main ]
+
 jobs:
+
   build:
-    name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.14
-        uses: actions/setup-go@v1
-        with:
-          go-version: 1.14
-        id: go
+    - uses: actions/checkout@v2
 
-      - name: setup env
-        run: |
-          echo "::set-env name=GOPATH::$(go env GOPATH)"
-          echo "::add-path::$(go env GOPATH)/bin"
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
 
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+    - name: Build
+      run: go build -v ./...
 
-      - name: Get dependencies
-        run: |
-          go get -v -t -d ./...
-          if [ -f Gopkg.toml ]; then
-              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-              dep ensure
-          fi
-
-      - name: Build
-        run: |
-          mkdir release
-          cd release
-          go build -v ..
-          cd ..
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up Go 1.14
-        uses: actions/setup-go@v1
-        with:
-          go-version: 1.14
-        id: go
-
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
-
-      - name: Get dependencies
-        run: |
-          go get -v -t -d ./...
-          if [ -f Gopkg.toml ]; then
-              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-              dep ensure
-          fi
-
-      - name: Test
-        run: go test -v ./...
+    - name: Test
+      run: go test -v ./...
