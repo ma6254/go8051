@@ -1,7 +1,5 @@
 # go8051
 
-doc: https://pkg.go.dev/github.com/ma6254/go8051
-
 [![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](http://golang.org)
 [![godoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/github.com/ma6254/go8051/)
 [![last-commit](https://img.shields.io/github/last-commit/ma6254/go8051.svg)](https://github.com/ma6254/go8051/commits)

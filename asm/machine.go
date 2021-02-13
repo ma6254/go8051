@@ -23,6 +23,9 @@ type BreakePoint struct {
 
 // Machine 8051 microchip
 type Machine struct {
+	mainTick *time.Ticker
+	exitCh   chan int
+
 	DATA        [0xFF]byte // RAM: DATA Range
 	ROM         []byte     // ROM: CODE Range
 	PC          uint       // PC: program counter
@@ -30,6 +33,7 @@ type Machine struct {
 	Frequency   time.Duration
 }
 
+// NewMachine Create 8051 machine
 func NewMachine(f time.Duration) *Machine {
 	m := &Machine{}
 	m.brakepoints = make(map[uint][]func(m *Machine))
@@ -39,10 +43,23 @@ func NewMachine(f time.Duration) *Machine {
 
 // Start 8051 machine
 func (m *Machine) Start() {
+	m.mainTick = time.NewTicker(m.Frequency)
+	m.exitCh = make(chan int, 1)
+	defer m.mainTick.Stop()
+	defer close(m.exitCh)
 	for {
-		m.Single()
-		time.Sleep(m.Frequency)
+		select {
+		case <-m.mainTick.C:
+			m.Single()
+		case <-m.exitCh:
+			return
+		}
 	}
+}
+
+// Stop 8051 machine
+func (m *Machine) Stop() {
+	m.exitCh <- 1
 }
 
 // Single 8051 machine

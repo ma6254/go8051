@@ -16,7 +16,6 @@ func Test_Base(t *testing.T) {
 		OK_1     bool
 		OK_2     bool
 		OK_3     bool
-		endCh    chan int = make(chan int)
 	)
 
 	// Flip IO
@@ -62,14 +61,12 @@ func Test_Base(t *testing.T) {
 		t.Logf("%04X LoopJump\n", m.PC)
 		if OK_1 && OK_2 {
 			OK_3 = true
-			endCh <- 1
+			m.Stop()
 		}
 	})
 
 	t.Logf("8051 Machine Running")
-	go m.Start()
-
-	<-endCh
+	m.Start()
 
 	if m.DATA[asm.R0] == 0 {
 		if OK_0_cnt == (0x7F - 1) {
