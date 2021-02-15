@@ -10,6 +10,10 @@ const (
 	R6 = 0x06
 	R7 = 0x07
 
+	SP  = 0x81
+	DPL = 0x82
+	DPH = 0x83
+
 	// P0 : IO port 0
 	P0 = 0x80
 	// P1 : IO port 1
