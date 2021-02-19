@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/ma6254/go8051/asm"
@@ -17,16 +18,52 @@ func main() {
 
 	m := asm.NewMachine(asm.Frequency10Hz)
 	m.ROM = b
-	m.Trace(0x00, func(m *asm.Machine) {
+	m.ROM = []byte{
+		0x2, 0x0, 0x25, // C:0x0000: LJMP C:0025
+		0xc0, 0xd0, //  C:0x0003 PUSH PSW(0xD0) function aaa begin
+		0x75, 0xd0, 0x8, // C:0x0005 MOV PSW(0xD0), 0x08
+		0x90, 0x0, 0x0, // C:0x0008 MOV DPTR, #0x0000
+		0xef,           // C:0x000B MOV A, R7
+		0xf0,           // C:0x000C MOVX DPTR, A
+		0x90, 0x0, 0x0, // C:0x000D MOV DPTR, #0x0000
+		0xe0,       // C:0x0010 MOVX A, @DPTR
+		0xff,       // C:0x0011
+		0x8f, 0x90, // C:0x0012
+		0xd0, 0xd0, // C:0x0014
+		0x22,       // C:0x0016 RET function aaa end
+		0x7f, 0x88, // C:0x0017 MOV R7, #0x88
+		0x12, 0x0, 0x3, // C:0x0019
+		0x75, 0x80, 0x55, // C:0x001C
+		0x75, 0x80, 0xaa, // C:0x001F
+		0x80, 0xf8, // C:0x0022
+		0x22,       // C:0x0024
+		0x78, 0x7f, // C:0x0025 MOV R0, #0x7F
+		0xe4,       // C:0x0027 CLR A
+		0xf6,       // C:0x0028 MOV @R0, A
+		0xd8, 0xfd, //  C:0x0029 DJNZ R0, C:0028
+		0x75, 0x81, 0xf, //  C:0x002B MOV SP(0x81), #0x0F
+		0x2, 0x0, 0x17, // C:0x002E LJMP main(C:0017)
+	}
+	m.Trace(0x0028, func(m *asm.Machine) {
+		log.Printf("%04X R0:%02X\n", m.PC, m.DATA[asm.R0])
+	})
+	m.Trace(0x001C, func(m *asm.Machine) {
 		log.Printf("%04X P0: %02X\n", m.PC, m.DATA[asm.P0])
 	})
-	m.Trace(0x04, func(m *asm.Machine) {
-		log.Printf("%04X P0: %02X\n", m.PC, m.DATA[asm.P0])
-	})
-	m.Trace(0x07, func(m *asm.Machine) {
-		log.Printf("%04X R0: %02X\n", m.PC, m.DATA[asm.R0])
-	})
+	// m.Trace(0x04, func(m *asm.Machine) {
+	// 	log.Printf("%04X P0: %02X\n", m.PC, m.DATA[asm.P0])
+	// })
+	// m.Trace(0x07, func(m *asm.Machine) {
+	// 	log.Printf("%04X R0: %02X\n", m.PC, m.DATA[asm.R0])
+	// })
 
-	log.Printf("8051 Machine Running")
+	fakecodeString, err := m.DumpFakeCode()
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
+	fmt.Println(fakecodeString)
+	log.Print("8051 Machine Running")
 	m.Start()
+	log.Printf("8051 Machine Stoped")
 }

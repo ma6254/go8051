@@ -1,6 +1,7 @@
 package asm_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -39,7 +40,20 @@ func Test_Base(t *testing.T) {
 		t.Errorf("ParseIntelHex %s", err)
 	}
 	m := asm.NewMachine(asm.Frequency1MHz)
-	m.ROM = mem.ToBinary(0x00, 0xFFFF, 0x00)
+	m.ROM = mem.ToBinary(0x00, 0x30, 0x00)
+	m.ROM = []byte{
+		0x2, 0x0, 0x3, // 0000: LJMP CODE:0003
+		0x78, 0x7f, // 0003:
+		0xe4,       // 0005:
+		0xf6,       // 006:
+		0xd8, 0xfd, // 0007:
+		0x75, 0x81, 0x7, // 0009:
+		0x2, 0x0, 0xf, // 000C: LJMP CODE:000F
+		0x75, 0x80, 0x55, // 000F: MOV P0(0x80), #055H
+		0x75, 0x80, 0xaa, // 0012: MOV P0(0x80), #0AAH
+		0x80, 0xf8, // 0015: SJMP CODE:000F
+	}
+	fmt.Printf("ROM: %#v", m.ROM)
 
 	m.Trace(0x06, func(m *asm.Machine) {
 		OK_0_cnt++
@@ -169,6 +183,16 @@ func Test_Call_Func(t *testing.T) {
 	m.Trace(0x0D, func(m *asm.Machine) {
 		sp1 = m.DATA[asm.SP]
 		t.Logf("%04X SP: %02X P1: %02X\n", m.PC, m.DATA[asm.SP], m.DATA[asm.P1])
+	})
+
+	m.Trace(0x27, func(m *asm.Machine) {
+		t.Logf("%04X R0: %02X ACC:%02X\n", m.PC, m.DATA[asm.R0], m.DATA[asm.ACC])
+	})
+	m.Trace(0x27, func(m *asm.Machine) {
+		t.Logf("%04X R0: %02X ACC:%02X\n", m.PC, m.DATA[asm.R0], m.DATA[asm.ACC])
+	})
+	m.Trace(0x29, func(m *asm.Machine) {
+		t.Logf("%04X R0: %02X\n", m.PC, m.DATA[asm.R0])
 	})
 
 	t.Logf("8051 Machine Running")

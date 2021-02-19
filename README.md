@@ -29,10 +29,18 @@ var b = []byte{
 }
 
 func main() {
-
-
 	m := asm.NewMachine(asm.Frequency10Hz)
 	m.ROM = b
+
+	// dump disassembly fakecode string
+	s,err := m.DumpFakeCode()
+	if err != nil {
+		fmt.Printf("%s\n",err)
+		return
+	}
+	fmt.Printf("%s\n", s)
+
+	// add breakpoint and run
 	m.Trace(0x00, func(m *asm.Machine) {
 		log.Printf("%04X P0: %02X\n", m.PC, m.DATA[asm.P0])
 	})
@@ -42,7 +50,6 @@ func main() {
 	m.Trace(0x07, func(m *asm.Machine) {
 		log.Printf("%04X R0: %02X\n", m.PC, m.DATA[asm.R0])
 	})
-
 	log.Printf("8051 Machine Running")
 	m.Start()
 }

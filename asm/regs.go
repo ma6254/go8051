@@ -27,3 +27,42 @@ const (
 	ACC = 0xE0
 	B   = 0xF0
 )
+
+var regList = []Register{
+	{0x81, "SP"},
+	{0x82, "DPL"},
+	{0x83, "DPH"},
+	{0x80, "P0"},
+	{0x90, "P1"},
+	{0xA0, "P2"},
+	{0xB0, "P3"},
+	{0xD0, "PSW"},
+	{0xE0, "ACC"},
+	{0xF0, "B"},
+}
+
+// FindRegByName find first one register by name, if not found return nil
+func FindRegByName(name string, list []Register) *Register {
+	for k, r := range list {
+		if r.Name == name {
+			return &list[k]
+		}
+	}
+	return nil
+}
+
+// FindRegByAddr find first one register by address, if not found return nil
+func FindRegByAddr(addr uint8, list []Register) *Register {
+	for k, r := range list {
+		if r.Addr == addr {
+			return &list[k]
+		}
+	}
+	return nil
+}
+
+// Register 8051 machine registers
+type Register struct {
+	Addr uint8
+	Name string
+}
